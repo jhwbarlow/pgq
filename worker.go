@@ -236,20 +236,32 @@ func (worker *Worker) PerformNextJob() (attempted bool, outErr error) {
 				queue.backoff = maxBackoff
 			}
 		}
+
 		// handle retries
-		if len(job.RetryWaits) > 0 {
+		if job.RetryForever {
+			afterTime := time.Now().Add(job.RetryWaits[0])
+			logEntry = logEntry.WithField("retryAfter", afterTime)
+			if _, err = enqueueJob(
+				tx,
+				job.QueueName,
+				job.Data,
+				After(afterTime),
+				RetryWaits(job.RetryWaits),
+			); err != nil {
+				return true, errorx.Decorate(err, "error enqueueing infinite retry")
+			}
+		} else if len(job.RetryWaits) > 0 {
 			// we errored, but we have more attempts.  Enqueue the next one for the future, after waiting
 			// the first attempt duration.  Store the rest of the attempt Durations on the new Job.
 			afterTime := time.Now().Add(job.RetryWaits[0])
 			logEntry = logEntry.WithField("retryAfter", afterTime)
-			_, err = enqueueJob(
+			if _, err = enqueueJob(
 				tx,
 				job.QueueName,
 				job.Data,
 				After(afterTime),
 				RetryWaits(job.RetryWaits[1:]),
-			)
-			if err != nil {
+			); err != nil {
 				return true, errorx.Decorate(err, "error enqueueing retry")
 			}
 		}

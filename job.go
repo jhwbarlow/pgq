@@ -9,14 +9,15 @@ import (
 
 // Job contains all the info needed to execute a single job attempt.
 type Job struct {
-	ID         int64       `db:"id"`
-	CreatedAt  time.Time   `db:"created_at"`
-	QueueName  string      `db:"queue_name"`
-	Data       []byte      `db:"data"`
-	RunAfter   time.Time   `db:"run_after"`
-	RetryWaits Durations   `db:"retry_waits"`
-	RanAt      null.Time   `db:"ran_at"`
-	Error      null.String `db:"error"`
+	ID           int64       `db:"id"`
+	CreatedAt    time.Time   `db:"created_at"`
+	QueueName    string      `db:"queue_name"`
+	Data         []byte      `db:"data"`
+	RunAfter     time.Time   `db:"run_after"`
+	RetryForever bool        `db:"retry_forever"`
+	RetryWaits   Durations   `db:"retry_waits"`
+	RanAt        null.Time   `db:"ran_at"`
+	Error        null.String `db:"error"`
 }
 
 // A JobOption sets an optional parameter on a Job that you're enqueueing.
@@ -33,6 +34,14 @@ func After(t time.Time) JobOption {
 func RetryWaits(ds []time.Duration) JobOption {
 	return func(j *Job) {
 		j.RetryWaits = Durations(ds)
+	}
+}
+
+// RetryForever sets whether the job should retry forever or use the RetryWaits durations.
+func RetryForever(forever bool, interval time.Duration) JobOption {
+	return func(j *Job) {
+		j.RetryForever = forever
+		j.RetryWaits = Durations{interval}
 	}
 }
 

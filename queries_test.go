@@ -25,6 +25,7 @@ func TestEnqueueJob(t *testing.T) {
 				err = tx.Get(job, "SELECT * from pgq_jobs WHERE id = $1", id)
 				assert.Equal(t, "someQueue", job.QueueName)
 				assert.Equal(t, []byte("some data"), job.Data)
+				assert.Equal(t, false, job.RetryForever)
 				assert.Equal(t, Durations{
 					time.Minute,
 					time.Minute * 10,

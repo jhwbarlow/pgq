@@ -5,6 +5,7 @@ CREATE TABLE pgq_jobs (
   queue_name TEXT NOT NULL,
   data BYTEA NOT NULL,
   run_after TIMESTAMP WITH TIME ZONE NOT NULL,
+  retry_forever BOOLEAN NOT NULL DEFAULT false,
   retry_waits TEXT[] NOT NULL,
   ran_at TIMESTAMP WITH TIME ZONE,
   error TEXT

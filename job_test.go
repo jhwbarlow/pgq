@@ -20,3 +20,10 @@ func TestRetryWaits(t *testing.T) {
 	RetryWaits(waits)(j)
 	assert.Equal(t, Durations(waits), j.RetryWaits)
 }
+
+func TestRetryForever(t *testing.T) {
+	j := &Job{}
+	RetryForever(true, time.Minute)(j)
+	assert.Equal(t, true, j.RetryForever)
+	assert.Equal(t, Durations{time.Minute}, j.RetryWaits)
+}

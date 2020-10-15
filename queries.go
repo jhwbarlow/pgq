@@ -46,20 +46,20 @@ type DB interface {
 	QueryRow(string, ...interface{}) *sql.Row
 }
 
-func enqueueJob(execer DB, queueName string, data []byte, options ...JobOption) (int, error) {
+func enqueueJob(execer DB, queueName string, data []byte, options ...JobOption) (int, error) {	
 	// create job with provided data and default options
 	job := &Job{
 		QueueName: queueName,
 		Data:      data,
 		RunAfter:  time.Now(),
-		// by default, we'll do 3 attempts with 60 seconds between each.
+		// by default, we'll do 3 retries: At 1 minute, 10 minute and 30 minute intervals.
 		RetryWaits: []time.Duration{
 			time.Second * 60,
 			time.Second * 60 * 10,
 			time.Second * 60 * 30,
 		},
 	}
-	// Apply any job customzations provided by the user
+	// Apply any job customizations provided by the user
 	for _, option := range options {
 		err := applyJobOption(option, job)
 		if err != nil {
@@ -73,14 +73,16 @@ func enqueueJob(execer DB, queueName string, data []byte, options ...JobOption) 
 				queue_name,
 				data,
 				run_after,
+				retry_forever,
 				retry_waits
 			) VALUES (
 				$1,
 				$2,
 				$3,
-				$4
+				$4,
+				$5
 			) RETURNING id;
-	`, job.QueueName, job.Data, job.RunAfter, job.RetryWaits).Scan(&jobID)
+	`, job.QueueName, job.Data, job.RunAfter, job.RetryForever, job.RetryWaits).Scan(&jobID)
 	return jobID, errorx.DecorateMany("could not enqueue job", err)
 }
 

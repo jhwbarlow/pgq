@@ -4,13 +4,13 @@ cache:
     - ${GOPATH}/src/github.com/${TRAVIS_REPO_SLUG}/vendor
     - ${GOPATH}/src/github.com/golang
 go:
-  - "1.11"
+  - "1.13"
 sudo: false
 
 services:
   - postgresql
 addons:
-  postgresql: "9.6"    
+  postgresql: "9.6"
 
 script:
   - make ci

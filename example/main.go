@@ -8,7 +8,7 @@ import (
 
 	cli "gopkg.in/urfave/cli.v1"
 
-	"github.com/btubbs/pgq"
+	"github.com/jhwbarlow/pgq"
 	_ "github.com/lib/pq"
 )
 

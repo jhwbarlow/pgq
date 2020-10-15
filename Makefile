@@ -1,16 +1,13 @@
-.PHONY: tests viewcoverage check dep ci
+.PHONY: tests viewcoverage check ci
 
 GOBIN ?= $(GOPATH)/bin
 
 all: tests check
 
-dep: $(GOBIN)/dep
-	$(GOBIN)/dep ensure -v
-
-tests: dep
+tests:
 	go test .
 
-coverage.txt: dep $(GOBIN)/go-acc
+coverage.txt: $(GOBIN)/go-acc
 	go-acc ./... --output=$@
 
 viewcoverage: coverage.txt 
@@ -21,9 +18,6 @@ check: $(GOBIN)/golangci-lint
 
 $(GOBIN)/goveralls:
 	go get -v -u github.com/mattn/goveralls
-
-$(GOBIN)/dep:
-	go get -v -u github.com/golang/dep/cmd/dep
 
 $(GOBIN)/golangci-lint:
 	curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(GOPATH)/bin v1.12.3
